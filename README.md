@@ -132,11 +132,95 @@ grant all on schema public TO catalog;
 
 sudo service postgresql restart
 ```
-
-
-21. Fetch catalog app from GitHub and set it up:
+17. Fetch catalog app from GitHub and set it up:
 ```bash
-# TODO
+cd /var/www
+sudo mkdir catalog
+sudo chown -R grader:grader catalog
+cd catalog
+git clone https://github.com/air-walk/udacity-item-catalog-app.git catalog
+
+# Prohibit access to .git:
+vim /var/www/catalog/.htaccess
+```
+Place this content in that file:
+```
+RedirectMatch 404 /\.git
+```
+```bash
+# Install Flask and virtualenv:
+sudo apt-get install -y python-pip
+pip install virtualenv
+
+cd catalog/vagrant/catalog
+virtualenv catalogenv
+source catalogenv/bin/activate
+pip install Flask
+pip install sqlalchemy flask-sqlalchemy
+pip install oauth2client
+pip install psycopg2
+deactivate
+
+# Configure and enable new Vhost:
+sudo vim /etc/apache2/sites-available/DemoApp.conf
+```
+Add this content to that file:
+```
+<VirtualHost *:80>
+  ServerName 52.90.97.136
+  ServerAdmin admin@catalog.com
+  WSGIScriptAlias / /var/www/catalog/catalog/vagrant/catalog/flaskapp.wsgi
+  <Directory /var/www/catalog/catalog/vagrant/catalog/>
+    Order allow,deny
+    Allow from all
+  </Directory>
+  Alias /static /var/www/catalog/catalog/vagrant/catalog/static
+  <Directory //var/www/catalog/catalog/vagrant/catalog/static/>
+    Order allow,deny
+    Allow from all
+  </Directory>
+  ErrorLog ${APACHE_LOG_DIR}/error-catalog.log
+  CustomLog ${APACHE_LOG_DIR}/access-catalog.log combined
+</VirtualHost>
+```
+Go back to the shell and execute:
+```bash
+sudo a2ensite DemoApp
+sudo service apache2 reload
+
+# Update .wsgi file:
+vim /var/www/catalog/catalog/vagrant/catalog/flaskapp.wsgi
+```
+Add this content to that file:
+```python
+#!/usr/bin/python
+import sys
+import logging
+import os
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0,"/var/www/catalog/catalog/vagrant/catalog/")
+
+activate_this = os.path.join("/var/www/catalog/catalog/vagrant/catalog/catalogenv/bin/activate_this.py")
+execfile(activate_this, dict(__file__=activate_this))
+
+from application import app as application
+application.secret_key = '<secret-key-here>'
+```
+* Place `client_secrets.json` (contains secret generated from the *Google API console*) in this root folder of the project.
+* Edit `application.py` and `models.py` to replace *SQLite* with *PostgreSQL* (see code comments present in those files).
+* Edit `application.py`'s `redirect_uri` inside `gconnect()` to `http://www.52.90.97.136.xip.io/gconnect`
+* In *Google API Console* for your project, add `http://www.52.90.97.136.xip.io` under **Authorized JavaScript origins** section, and `http://www.52.90.97.136.xip.io/gconnect`under **Authorized redirect URIs**. Click *Save*.
+* Go back to your shell and execute:
+```bash
+sudo a2dissite 000-default.conf
+sudo service apache2 reload
+sudo service apache2 restart
+```
+18. You should now be able to use the website at: http://www.52.90.97.136.xip.io
+19. Logs can be accessed using:
+```bash
+sudo less /var/log/apache2/access-catalog.log
+sudo less /var/log/apache2/error-catalog.log
 ```
 
 **References:**
