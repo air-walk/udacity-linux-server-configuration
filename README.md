@@ -109,9 +109,29 @@ def application(environment, response):
   response(status, response_headers)
   return [output]
 ```
-Check that *Apache* and *mod_wsgi* are installed correctly by opening your browser, navigating to the following link and seeing *Hello, world!*:
-http://52.90.97.136
+Check that *Apache* and *mod_wsgi* are installed correctly by opening your browser, navigating to the following link and seeing *Hello, world!*: http://52.90.97.136
 
+16. Install and configure PostgreSQL:
+```bash
+sudo apt-get install -y postgresql postgresql-contrib
+# Connect to DB and update password:
+sudo -u postgres psql postgres
+
+# Change password for this user:
+\password postgres
+
+# Configure a new DB user with appropriate permissions:
+create user catalog WITH PASSWORD '<password-here>';
+alter role catalog WITH LOGIN;
+alter user catalog CREATEDB;
+create database catalog WITH OWNER catalog;
+\c catalog
+revoke all on schema public FROM public;
+grant all on schema public TO catalog;
+\q
+
+sudo service postgresql restart
+```
 
 
 21. Fetch catalog app from GitHub and set it up:
