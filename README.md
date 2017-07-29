@@ -19,6 +19,8 @@ sudo vim /etc/ssh/sshd_config
 sudo service sshd restart
 sudo netstat -tulpn | grep "sshd"
 # You should now see the daemon listening on port 2200
+exit
+# Logout of the server
 ```
 5. Finish changing SSH port:
     1. Open TCP ports `2200` and `123` and remove port `22` from the firewall settings in the LightSail console.
@@ -54,7 +56,7 @@ sudo su grader
 mkdir .ssh
 sudo chmod 700 .ssh/
 vim .ssh/authorized_keys
-# Add a newline followed by the content you had copied on clipboard
+# Add the content you had copied on clipboard
 
 sudo chmod 600 authorized_keys
 ```
@@ -82,13 +84,37 @@ sudo dpkg-reconfigure tzdata
 sudo apt-get install -y apache2
 
 # Check that it's up and running by opening your browser and navigating to:
-http://52.91.141.45:80
+http://52.90.97.136
 
-# Install mod_wsgi and enable it
+# Install *mod_wsgi*:
 sudo apt-get install -y libapache2-mod-wsgi python-dev
-sudo a2enmod wsgi
 ```
-15. Fetch catalog app from GitHub and set it up:
+15. Configure a demo WSGI app:
+```bash
+sudo vim /etc/apache2/sites-enabled/000-default.conf
+```
+Right before ending `</VirtualHost>` block, add:
+`WSGIScriptAlias / /var/www/html/myapp.wsgi`
+
+```bash
+sudo service apache2 restart
+sudo vim /var/www/html/myapp.wsgi
+```
+Add this content in that file:
+```python
+def application(environment, response):
+  status = '200 OK'
+  output = 'Hello, world!'
+  response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(output)))]
+  response(status, response_headers)
+  return [output]
+```
+Check that *Apache* and *mod_wsgi* are installed correctly by opening your browser, navigating to the following link and seeing *Hello, world!*:
+http://52.90.97.136
+
+
+
+21. Fetch catalog app from GitHub and set it up:
 ```bash
 # TODO
 ```
