@@ -2,10 +2,10 @@
 This repo contains information about how an Ubuntu server was setup as a webserver with a web app deployed to it.
 
 ## Steps:
-1. Provision an *AWS LightSail* Ubuntu instance. IP address = **52.91.141.45** and pem file **LightsailDefaultPrivateKey-us-east-1.pem**.
+1. Provision an *AWS LightSail* Ubuntu instance. IP address = **52.90.97.136** and pem file **LightsailDefaultPrivateKey-us-east-1.pem**.
 2. SSH onto the server:
 ```bash
-ssh -i "/home/air-walk/workspaces/udacity-linux-server-configuration/LightsailDefaultPrivateKey-us-east-1.pem" ubuntu@52.91.141.45 -p 22
+ssh -i "/home/air-walk/workspaces/udacity-linux-server-configuration/LightsailDefaultPrivateKey-us-east-1.pem" ubuntu@52.90.97.136 -p 22
 ```
 3. Update all packages:
 ```bash
@@ -24,7 +24,7 @@ sudo netstat -tulpn | grep "sshd"
     1. Open TCP ports `2200` and `123` and remove port `22` from the firewall settings in the LightSail console.
     2. Try logging onto the server on the new port:
 ```bash
-ssh -i "/home/air-walk/workspaces/udacity-linux-server-configuration/LightsailDefaultPrivateKey-us-east-1.pem" ubuntu@52.91.141.45 -p 2200
+ssh -i "/home/air-walk/workspaces/udacity-linux-server-configuration/LightsailDefaultPrivateKey-us-east-1.pem" ubuntu@52.90.97.136 -p 2200
 ```
 6. Create user account `grader`:
 ```bash
@@ -60,7 +60,7 @@ sudo chmod 600 authorized_keys
 ```
 11. Now try logging onto the server as `grader` with this private key (+passphrase)
 ```bash
-ssh -i "/home/air-walk/.ssh/id_lightsail_ubuntu_rsa" grader@52.91.141.45 -p 2200
+ssh -i "/home/air-walk/.ssh/id_lightsail_ubuntu_rsa" grader@52.90.97.136 -p 2200
 ```
 12. Configure *UFW*:
 ```bash
@@ -92,3 +92,6 @@ sudo a2enmod wsgi
 ```bash
 # TODO
 ```
+
+**References:**
+[1] https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps
